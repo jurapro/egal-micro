@@ -22,8 +22,8 @@ services:
     tty: true
     ports:
       - ${DATABASE_PORT:-5434}:5432
-    #volumes:
-    #  - ./database/data:/var/lib/postgresql/data
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
     environment:
       POSTGRES_MULTIPLE_DATABASES: interface,monolit,auth
       POSTGRES_USER: postgres
@@ -50,7 +50,6 @@ services:
     container_name: ${PROJECT_NAME}-auth-service
     image: egalbox/auth-service:2.0.0
     tty: true
-    #command: composer install --ignore-platform-reqs
     environment:
       APP_SERVICE_NAME: auth
       APP_SERVICE_KEY: uZsLnAJz35FWUTVx@eg#Xirv6I*jcw2Y
