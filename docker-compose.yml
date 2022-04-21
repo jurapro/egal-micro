@@ -6,7 +6,6 @@ services:
   rabbitmq:
     container_name: ${PROJECT_NAME}-rabbitmq
     image: ${RABBITMQ_TAG:-bitnami/rabbitmq:latest}
-    restart: unless-stopped
     environment:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-password}
@@ -34,7 +33,6 @@ services:
   web-service:
     container_name: ${PROJECT_NAME}-web-service
     image: egalbox/web-service:2.2.1
-    restart: unless-stopped
     tty: true
     ports:
       - ${WEB_SERVICE_PORT:-81}:8080
@@ -51,7 +49,6 @@ services:
   auth-service:
     container_name: ${PROJECT_NAME}-auth-service
     image: egalbox/auth-service:2.0.0
-    restart: unless-stopped
     tty: true
     #command: composer install --ignore-platform-reqs
     environment:
@@ -70,7 +67,6 @@ services:
 
   monolit-service:
     container_name: ${PROJECT_NAME}-monolit-service
-    restart: unless-stopped
     tty: true
     build:
       context: monolit-service
@@ -78,7 +74,7 @@ services:
         DEBUG: 'true'
     volumes:
       - ./monolit-service:/app
-    command: composer install --ignore-platform-reqs
+    #command: composer install --ignore-platform-reqs && php artisan migrate --force --seed && php artisan egal:run
     environment:
       APP_SERVICE_NAME: monolit
       APP_SERVICE_KEY: B#J5mUWKh8FqzQ6Tj0XtYruIcSwpb@ed
