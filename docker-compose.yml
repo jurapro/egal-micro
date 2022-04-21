@@ -6,6 +6,7 @@ services:
   rabbitmq:
     container_name: ${PROJECT_NAME}-rabbitmq
     image: ${RABBITMQ_TAG:-bitnami/rabbitmq:latest}
+    restart: unless-stopped
     environment:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-password}
@@ -15,15 +16,15 @@ services:
       - ${RABBITMQ_MANAGER_PORT:-15672}:15672
 
   # Нужен для работы сервисов, которые взаимодействуют с базой данных
-  # На данном шаге нужен только для auth-service
   database:
     container_name: ${PROJECT_NAME}-database
-    image: egalbox/postgres:2.0.0
+    image: egalbox/postgres:2.1.0
     restart: always
+    tty: true
     ports:
       - ${DATABASE_PORT:-5434}:5432
-    volumes:
-      - ./database/data:/var/lib/postgresql/data
+    #volumes:
+    #  - ./database/data:/var/lib/postgresql/data
     environment:
       POSTGRES_MULTIPLE_DATABASES: interface,monolit,auth
       POSTGRES_USER: postgres
@@ -33,6 +34,8 @@ services:
   web-service:
     container_name: ${PROJECT_NAME}-web-service
     image: egalbox/web-service:2.2.1
+    restart: unless-stopped
+    tty: true
     ports:
       - ${WEB_SERVICE_PORT:-81}:8080
     environment:
@@ -47,7 +50,10 @@ services:
 
   auth-service:
     container_name: ${PROJECT_NAME}-auth-service
-    image: egalbox/auth-service:2.2.0
+    image: egalbox/auth-service:2.0.0
+    restart: unless-stopped
+    tty: true
+    #command: composer install --ignore-platform-reqs
     environment:
       APP_SERVICE_NAME: auth
       APP_SERVICE_KEY: uZsLnAJz35FWUTVx@eg#Xirv6I*jcw2Y
@@ -64,9 +70,15 @@ services:
 
   monolit-service:
     container_name: ${PROJECT_NAME}-monolit-service
-    build: monolit-service
+    restart: unless-stopped
+    tty: true
+    build:
+      context: monolit-service
+      args:
+        DEBUG: 'true'
     volumes:
-      - ./monolit-service/:/app/
+      - ./monolit-service:/app
+    command: composer install --ignore-platform-reqs
     environment:
       APP_SERVICE_NAME: monolit
       APP_SERVICE_KEY: B#J5mUWKh8FqzQ6Tj0XtYruIcSwpb@ed

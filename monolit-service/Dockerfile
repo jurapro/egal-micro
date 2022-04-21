@@ -4,7 +4,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait
 
 FROM php:8.0.13-alpine
 
-ARG DEBUG='false'
+ARG DEBUG='true'
 ARG RUN_DEPS='postgresql-libs'
 ARG BUILD_DEPS='postgresql-dev'
 ARG PHP_EXTENSIONS='sockets pcntl pdo_pgsql'
@@ -26,7 +26,7 @@ WORKDIR /app
 # Preparing code base
 COPY composer.json .
 COPY composer.lock .
-RUN composer install --no-interaction --no-progress --no-autoloader --no-cache \
+RUN composer install --no-interaction --no-autoloader --no-cache \
     $(if [ $DEBUG == 'true' ]; then echo '--dev'; else echo '--no-dev'; fi)
 COPY . .
 RUN composer dump-autoload
@@ -34,5 +34,4 @@ RUN composer dump-autoload
 # Cleanup before run
 RUN if [ $DEBUG == 'false' ]; then rm /usr/bin/composer; fi
 
-CMD /wait && php artisan migrate:fresh --force --seed && php artisan egal:run
-#CMD /wait && artisan egal:run
+CMD /wait && php artisan migrate --force --seed && php artisan egal:run
